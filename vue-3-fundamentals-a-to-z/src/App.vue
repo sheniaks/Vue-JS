@@ -17,7 +17,8 @@
       v-if="!isPostsLoading"
     />
     <div v-else>Идёт загрузка...</div>
-    <div class="page__wrapper">
+    <div ref="observer" class="observer"></div>
+    <!-- <div class="page__wrapper">
       <div
         class="page"
         v-for="pageNumber in totalPages"
@@ -29,7 +30,7 @@
       >
         {{ pageNumber }}
       </div>
-    </div>
+    </div> -->
   </div>
 </template>
 
@@ -78,9 +79,9 @@ export default {
     showDialog() {
       this.dialogVisible = true;
     },
-    changePage(pageNumber) {
-      this.page = pageNumber;
-    },
+    // changePage(pageNumber) {
+    //   this.page = pageNumber;
+    // },
     async fetchPosts() {
       try {
         this.isPostsLoading = true;
@@ -103,9 +104,43 @@ export default {
         this.isPostsLoading = false;
       }
     },
+    async loadMorePosts() {
+      try {
+        this.page += 1;
+        const response = await axios.get(
+          "https://jsonplaceholder.typicode.com/posts",
+          {
+            params: {
+              _page: this.page,
+              _limit: this.limit,
+            },
+          }
+        );
+        this.totalPages = Math.ceil(
+          response.headers["x-total-count"] / this.limit
+        );
+        this.posts = [...this.posts, ...response.data];
+      } catch (e) {
+        alert("Ошибка");
+      } 
+    },
   },
   mounted() {
     this.fetchPosts();
+    // console.log(this.$refs.observer);
+    const options = {
+      rootMargin: "0px",
+      threshold: 1.0,
+    };
+    const callback = (entries, observer) => {
+      if (entries[0].isIntersecting && this.page < this.totalPages){
+        this.loadMorePosts();
+        
+      }
+      /* Content excerpted, show below */
+    };
+    const observer = new IntersectionObserver(callback, options);
+    observer.observe(this.$refs.observer);
   },
   computed: {
     sortedPosts() {
@@ -120,9 +155,9 @@ export default {
     },
   },
   watch: {
-    page() {
-      this.fetchPosts();
-    }
+    // page() {
+    //   this.fetchPosts();
+    // },
     // selectedSort(newValue) {
     //   this.posts.sort((post1, post2) => {
     //     return post1[newValue]?.localeCompare(post2[newValue])
@@ -155,6 +190,11 @@ export default {
   padding: 10px;
 }
 .current-page {
+  border: 2px solid teal;
+}
+.observer {
+  margin-top: 15px;
+  height: 30px;
   border: 2px solid teal;
 }
 </style>
