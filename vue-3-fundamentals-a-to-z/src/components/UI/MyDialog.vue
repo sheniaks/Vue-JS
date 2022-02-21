@@ -13,7 +13,7 @@ export default {
   name: "my-dialog",
   mixins: [toggleMixin],
   mounted() {
-    console.log('Dialog mounted');
+   // console.log('Dialog mounted');
   }
 };
 </script>

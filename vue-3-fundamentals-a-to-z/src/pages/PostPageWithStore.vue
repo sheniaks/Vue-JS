@@ -27,9 +27,6 @@
       />
     </div>
 
-    <!-- Запрос на посты по кнопке
-      <my-button @click="fetchPosts">Получить посты</my-button> -->
-
     <!-- Модалка + список постов -->
     <my-dialog v-model:show="dialogVisible">
       <post-form @create="createPost" />
